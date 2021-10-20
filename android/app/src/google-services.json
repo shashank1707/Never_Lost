@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "93981570587",
+    "project_id": "neverlost-d1bf6",
+    "storage_bucket": "neverlost-d1bf6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93981570587:android:07d5fa4017460ecb50eabe",
+        "android_client_info": {
+          "package_name": "com.example.never_lost"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "93981570587-cr6nqclu6t9b928issqi4bosh98qf4tm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlZjJJcinagO60K6vILuq-9ptKUgWl2nU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "93981570587-cr6nqclu6t9b928issqi4bosh98qf4tm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
