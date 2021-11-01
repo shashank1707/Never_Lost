@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:never_lost/firebase/hive.dart';
 
 class AuthMethods {
+
+  final auth = FirebaseAuth.instance;
+  
   Future<UserCredential> signInWithGoogle() async {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -15,6 +19,15 @@ class AuthMethods {
       idToken: googleAuth?.idToken,
     );
     // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    return await auth.signInWithCredential(credential);
+  }
+
+  Future getCurrentUser() async {
+    return auth.currentUser;
+  }
+
+  signout() async {
+    await auth.signOut();
+    HiveDB().deleteData();
   }
 }

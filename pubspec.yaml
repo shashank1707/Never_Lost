@@ -37,6 +37,10 @@ dependencies:
   shared_preferences: ^2.0.8
   persistent_bottom_nav_bar: ^4.0.2
   google_sign_in: ^5.1.1
+  hive: ^2.0.4
+  hive_flutter: ^1.1.0
+  bottom_navy_bar: ^6.0.0
+  icon_badge: ^1.0.0
 
 
 
@@ -47,6 +51,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  hive_generator: ^1.1.1
+  build_runner: ^2.1.4
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
