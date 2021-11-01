@@ -36,7 +36,8 @@ class _ChatsState extends State<Chats> {
 
   String claculateTime(_timestamp) {
     DateTime currentTime = DateTime.now();
-    var timestamp = DateTime.fromMicrosecondsSinceEpoch(_timestamp.microsecondsSinceEpoch);
+    var timestamp =
+        DateTime.fromMicrosecondsSinceEpoch(_timestamp.microsecondsSinceEpoch);
     var yearDiff = currentTime.year - timestamp.year;
     var monthDiff = currentTime.month - timestamp.month;
     var dayDiff = currentTime.day - timestamp.day;
@@ -66,15 +67,13 @@ class _ChatsState extends State<Chats> {
         minDiff < 1) {
       return 'Just Now';
     } else if (yearDiff < 1 && monthDiff < 1 && dayDiff < 1) {
-      if(int.parse(hour) == 0){
+      if (int.parse(hour) == 0) {
         return '12:$min AM';
-      }
-      else if(int.parse(hour) == 12){
+      } else if (int.parse(hour) == 12) {
         return '12:$min PM';
-      }
-      else if( int.parse(hour) > 12){
+      } else if (int.parse(hour) > 12) {
         return '${int.parse(hour) - 12}:$min PM';
-      }else{
+      } else {
         return '$hour:$min AM';
       }
     } else if (yearDiff < 1 && monthDiff < 1 && dayDiff < 2) {
@@ -145,49 +144,59 @@ class _ChatsState extends State<Chats> {
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data.docs[index];
-                  Map<String, dynamic> friendUser =
-                      ds['user1Info']['email'] != widget.user['email']
-                          ? ds['user1Info']
-                          : ds['user2Info'];
-                  return Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: ListTile(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ChatRoom(
-                                        user: widget.user,
-                                        friendUser: friendUser)));
-                          },
-                          title: Text(
-                            friendUser['name'],
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            ds['lastMessage'],
-                            softWrap: true,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          leading: GestureDetector(
-                            onTap: () {
-                              showPhoto(height, width, friendUser['photoURL']);
-                            },
-                            child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Image.network(friendUser['photoURL'])),
-                          ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(claculateTime(ds['timestamp'])),
-                              messageCount(ds.id, widget.user['email'])
-                            ],
-                          )),
-                    ),
+                  String friendEmail = ds['users'][0] != widget.user['email']
+                      ? ds['users'][0]
+                      : ds['users'][1];
+
+                  return StreamBuilder(
+                    stream: DatabaseMethods().searchByEmail(friendEmail),
+                    builder: (context, AsyncSnapshot snap) {
+                      Map<String, dynamic> friendUser = snap.hasData ?
+                          snap.data.docs[0].data() : {};
+                      return snap.hasData ? Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: ListTile(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ChatRoom(
+                                            user: widget.user,
+                                            friendUser: friendUser)));
+                              },
+                              title: Text(
+                                friendUser['name'],
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(
+                                ds['lastMessage'],
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              leading: GestureDetector(
+                                onTap: () {
+                                  showPhoto(
+                                      height, width, friendUser['photoURL']);
+                                },
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child:
+                                        Image.network(friendUser['photoURL'])),
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                // crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(claculateTime(ds['timestamp'])),
+                                  messageCount(ds.id, widget.user['email'])
+                                ],
+                              )),
+                        ),
+                      ) : Container();
+                    },
                   );
                 },
               )

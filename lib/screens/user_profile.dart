@@ -5,6 +5,7 @@ import 'package:never_lost/constants.dart';
 import 'package:never_lost/firebase/auth.dart';
 import 'package:never_lost/firebase/database.dart';
 import 'package:never_lost/firebase/hive.dart';
+import 'package:never_lost/screens/chatroom.dart';
 
 
 // TODO: message button function
@@ -167,6 +168,7 @@ class _UserProfileState extends State<UserProfile> {
                                             padding: EdgeInsets.all(8),
                                             decoration: BoxDecoration(
                                                 color: backgroundColor2,
+                                                border: Border.all(width: 2, color: backgroundColor2),
                                                 borderRadius:
                                                     BorderRadius.circular(100)),
                                             child: Text(
@@ -176,20 +178,25 @@ class _UserProfileState extends State<UserProfile> {
                                             ),
                                           ),
                                         ),
-                                        MaterialButton(
-                                          onPressed: () {},
-                                          child: Container(
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: backgroundColor2,
-                                                    width: 2),
-                                                borderRadius:
-                                                    BorderRadius.circular(100)),
-                                            child: Text(
-                                              'Message',
-                                              style: TextStyle(
-                                                  color: backgroundColor2),
+                                        Visibility(
+                                          visible: userProfile['friendList'].contains(widget.currentUser['uid']),
+                                          child: MaterialButton(
+                                            onPressed: userProfile['friendList'].contains(widget.currentUser['uid']) ? () {
+                                              Navigator.push(context, MaterialPageRoute(builder: (context) => ChatRoom(user: widget.currentUser, friendUser: userProfile)));
+                                            } : null,
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: backgroundColor2,
+                                                      width: 2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(100)),
+                                              child: Text(
+                                                'Message',
+                                                style: TextStyle(
+                                                    color: backgroundColor2),
+                                              ),
                                             ),
                                           ),
                                         ),

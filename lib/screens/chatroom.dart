@@ -55,7 +55,7 @@ class _ChatRoomState extends State<ChatRoom> {
       'photoURL': widget.friendUser['photoURL'],
     };
     await DatabaseMethods().createChatRoom(
-        chatRoomID, widget.user['email'], widget.friendUser['email'], tempUser, tempFriendUser);
+        chatRoomID, widget.user['email'], widget.friendUser['email']);
   }
 
   void getMessages() async {

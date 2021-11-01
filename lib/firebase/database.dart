@@ -53,7 +53,7 @@ class DatabaseMethods {
   Future<Stream<QuerySnapshot>> searchByName(name) async {
     return firestore.collection('users').where('name', isEqualTo: name.toUpperCase()).snapshots();
   }
-  Future<Stream<QuerySnapshot>> searchByEmail(email) async {
+  Stream<QuerySnapshot> searchByEmail(email) {
     return firestore.collection('users').where('email', isEqualTo: email.toLowerCase()).snapshots();
   }
   Future<Stream<QuerySnapshot>> searchByPhone(phone) async {
@@ -68,7 +68,7 @@ class DatabaseMethods {
     return await firestore.collection('chatRooms').doc(chatRoomID).get();
   }
 
-  createChatRoom(chatRoomID, user1, user2, user1Info, user2Info) async {
+  createChatRoom(chatRoomID, user1, user2) async {
     Map<String, dynamic> chatRoomInfo = {
       'lastMessage': "Started a ChatRoom",
       'sender': user1,
@@ -76,8 +76,6 @@ class DatabaseMethods {
       'seen': false,
       'timestamp': DateTime.now(),
       'users': [user1, user2],
-      'user1Info': user1Info,
-      'user2Info': user2Info
     };
 
     await findChatRoom(chatRoomID).then((value)async {
