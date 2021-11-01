@@ -68,8 +68,11 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   void sendMessage() async {
+
+    _messageController.text = _messageController.text.trim();
+
     Map<String, dynamic> lastMessageInfo = {
-      'lastMessage': _messageController.text.trim(),
+      'lastMessage': _messageController.text,
       'sender': widget.user['email'],
       'receiver': widget.friendUser['email'],
       'seen': false,
@@ -77,15 +80,16 @@ class _ChatRoomState extends State<ChatRoom> {
     };
 
     Map<String, dynamic> messageInfo = {
-      'message': _messageController.text.trim(),
+      'message': _messageController.text,
       'sender': widget.user['email'],
       'receiver': widget.friendUser['email'],
       'seen': false,
       'timestamp': DateTime.now()
     };
-
-    DatabaseMethods().addMessage(chatRoomID, messageInfo, lastMessageInfo);
-    _messageController.clear();
+    if (_messageController.text != '') {
+      DatabaseMethods().addMessage(chatRoomID, messageInfo, lastMessageInfo);
+      _messageController.clear();
+    }
   }
 
   Widget messageList() {
@@ -106,7 +110,8 @@ class _ChatRoomState extends State<ChatRoom> {
                   }
                   return Wrap(
                     crossAxisAlignment: WrapCrossAlignment.end,
-                    alignment: sendbyMe ? WrapAlignment.end : WrapAlignment.start,
+                    alignment:
+                        sendbyMe ? WrapAlignment.end : WrapAlignment.start,
                     children: [
                       Container(
                         padding:
@@ -124,7 +129,7 @@ class _ChatRoomState extends State<ChatRoom> {
                         child: Text(
                           ds['message'],
                           style: TextStyle(
-                            fontSize: 16,
+                              fontSize: 16,
                               color: sendbyMe
                                   ? backgroundColor2
                                   : backgroundColor1),
