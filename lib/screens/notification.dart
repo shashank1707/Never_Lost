@@ -155,10 +155,16 @@ class _FriendRequestsState extends State<FriendRequests> {
                                   child: Image.network(friendUser['photoURL'])),
                               title: Text(friendUser['name'],
                                   style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
+                                      TextStyle(fontWeight: FontWeight.bold),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,),
                               subtitle: Text(friendUser['email'],
                                   style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
+                                      TextStyle(fontWeight: FontWeight.bold),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,),
                               trailing: Wrap(children: [
                                 IconButton(
                                     onPressed: () {

@@ -182,7 +182,7 @@ class _UserProfileState extends State<UserProfile> {
                                           visible: userProfile['friendList'].contains(widget.currentUser['uid']),
                                           child: MaterialButton(
                                             onPressed: userProfile['friendList'].contains(widget.currentUser['uid']) ? () {
-                                              Navigator.push(context, MaterialPageRoute(builder: (context) => ChatRoom(user: widget.currentUser, friendUser: userProfile)));
+                                              Navigator.push(context, MaterialPageRoute(builder: (context) => ChatRoomBar(user: widget.currentUser, friendUser: userProfile)));
                                             } : null,
                                             child: Container(
                                               padding: EdgeInsets.all(8),

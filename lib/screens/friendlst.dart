@@ -83,7 +83,7 @@ class _FriendListState extends State<FriendList> {
           padding: const EdgeInsets.all(4.0),
           child: ListTile(
             onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ChatRoom(user: user, friendUser: friendUser)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ChatRoomBar(user: user, friendUser: friendUser)));
             },
             leading: GestureDetector(
               onTap: (){
@@ -94,9 +94,15 @@ class _FriendListState extends State<FriendList> {
                           child: Image.network(friendUser['photoURL'])),
             ),
              title: Text(friendUser['name'],
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,),
                       subtitle: Text(friendUser['email'],
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,),
           ),
         );
       },

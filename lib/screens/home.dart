@@ -12,6 +12,7 @@ import 'package:never_lost/firebase/hive.dart';
 import 'package:never_lost/screens/chatroom.dart';
 import 'package:never_lost/screens/chats.dart';
 import 'package:never_lost/screens/friendlst.dart';
+import 'package:never_lost/screens/groupchats.dart';
 import 'package:never_lost/screens/notification.dart';
 import 'package:never_lost/screens/search.dart';
 import 'package:never_lost/screens/settings.dart';
@@ -194,7 +195,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               controller: _tabController,
               children: [
                 Chats(user: user),
-                Loading(),
+                GroupChats(user: user),
                 Search(uid: user['uid']),
                 Loading()
               ],

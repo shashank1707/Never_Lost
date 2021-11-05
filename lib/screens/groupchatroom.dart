@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -5,15 +7,17 @@ import 'package:never_lost/components/loading.dart';
 import 'package:never_lost/constants.dart';
 import 'package:never_lost/firebase/database.dart';
 
-class ChatRoomBar extends StatefulWidget {
-  final Map<String, dynamic> user, friendUser;
-  const ChatRoomBar({Key? key, required this.user, required this.friendUser})
+class GroupChatRoomBar extends StatefulWidget {
+  final Map<String, dynamic> user, groupInfo;
+  const GroupChatRoomBar(
+      {Key? key, required this.user, required this.groupInfo})
       : super(key: key);
   @override
-  _ChatRoomBarState createState() => _ChatRoomBarState();
+  _GroupChatRoomBarState createState() => _GroupChatRoomBarState();
 }
 
-class _ChatRoomBarState extends State<ChatRoomBar> with SingleTickerProviderStateMixin {
+class _GroupChatRoomBarState extends State<GroupChatRoomBar>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -30,14 +34,8 @@ class _ChatRoomBarState extends State<ChatRoomBar> with SingleTickerProviderStat
         elevation: 0,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
-        leading: Container(
-          margin: EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            image: DecorationImage(image: NetworkImage(widget.friendUser['photoURL']))
-          ),
-        ),
-        title: Text(widget.friendUser['name']),
+        leading: Icon(Icons.people_alt_outlined, size: 28),
+        title: Text(widget.groupInfo['name']),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -77,7 +75,7 @@ class _ChatRoomBarState extends State<ChatRoomBar> with SingleTickerProviderStat
       body: TabBarView(
         controller: _tabController,
         children: [
-          ChatRoom(user: widget.user, friendUser: widget.friendUser),
+          GroupChatRoom(user: widget.user, groupInfo: widget.groupInfo),
           Loading()
         ],
       ),
@@ -85,53 +83,31 @@ class _ChatRoomBarState extends State<ChatRoomBar> with SingleTickerProviderStat
   }
 }
 
-class ChatRoom extends StatefulWidget {
-  final Map<String, dynamic> user, friendUser;
-  const ChatRoom({Key? key, required this.user, required this.friendUser})
+class GroupChatRoom extends StatefulWidget {
+  final Map<String, dynamic> user, groupInfo;
+  const GroupChatRoom({Key? key, required this.user, required this.groupInfo})
       : super(key: key);
 
   @override
-  _ChatRoomState createState() => _ChatRoomState();
+  _GroupChatRoomState createState() => _GroupChatRoomState();
 }
 
-class _ChatRoomState extends State<ChatRoom> {
+class _GroupChatRoomState extends State<GroupChatRoom> {
   final _messageController = TextEditingController();
   late Stream messageStream;
-  late String chatRoomID;
   bool isLoading = true;
 
   @override
   void initState() {
-    createChatRoomID();
+    getMessages();
     super.initState();
   }
 
-  void createChatRoomID() async {
-    List tempList = [
-      widget.user['email'].split('@')[0],
-      widget.friendUser['email'].split('@')[0]
-    ];
-    tempList.sort((a, b) => a.compareTo(b));
-    setState(() {
-      chatRoomID = tempList.join('_');
-    });
-    await createChatRoom().then((value) {
-      getMessages();
-    });
-  }
-
-  Future<void> createChatRoom() async {
-
-    await DatabaseMethods().createChatRoom(
-        chatRoomID, widget.user['email'], widget.friendUser['email']);
-  }
-
   void getMessages() async {
-    await DatabaseMethods().getMessages(chatRoomID).then((value) {
-      setState(() {
-        messageStream = value;
-        isLoading = false;
-      });
+    messageStream =
+        await DatabaseMethods().getGroupMessages(widget.groupInfo['id']);
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -140,21 +116,22 @@ class _ChatRoomState extends State<ChatRoom> {
 
     Map<String, dynamic> lastMessageInfo = {
       'lastMessage': _messageController.text,
-      'sender': widget.user['email'],
-      'receiver': widget.friendUser['email'],
-      'seen': false,
+      'sender': widget.user['uid'],
+      'senderName': widget.user['name'],
       'timestamp': DateTime.now(),
     };
 
     Map<String, dynamic> messageInfo = {
       'message': _messageController.text,
-      'sender': widget.user['email'],
-      'receiver': widget.friendUser['email'],
-      'seen': false,
+      'sender': widget.user['uid'],
+      'senderName': widget.user['name'],
+      'seenBy': [],
+      'notSeenBy': widget.groupInfo['users'],
       'timestamp': DateTime.now()
     };
     if (_messageController.text != '') {
-      DatabaseMethods().addMessage(chatRoomID, messageInfo, lastMessageInfo);
+      DatabaseMethods().addGroupMessage(
+          widget.groupInfo['id'], messageInfo, lastMessageInfo);
       _messageController.clear();
     }
   }
@@ -170,10 +147,29 @@ class _ChatRoomState extends State<ChatRoom> {
                 shrinkWrap: true,
                 reverse: true,
                 itemBuilder: (context, index) {
-                  DocumentSnapshot ds = snapshot.data.docs[index];
-                  bool sendbyMe = ds['sender'] == widget.user['email'];
+                  Map<String, dynamic> ds = snapshot.data.docs[index].data();
+                  print(ds);
+                  ds['id'] = snapshot.data.docs[index].id;
+                  bool sendbyMe = ds['sender'] == widget.user['uid'];
                   if (!sendbyMe) {
-                    DatabaseMethods().updateSeenInfo(chatRoomID, ds.id);
+                    List seenBy = ds['seenBy'];
+                    List notSeenBy = ds['notSeenBy'];
+
+                    if (!seenBy.contains(widget.user['uid'])) {
+                      seenBy.add(widget.user['uid']);
+                    }
+                    if (!notSeenBy.contains(widget.user['uid'])) {
+                      notSeenBy.remove(widget.user['uid']);
+                    }
+                    notSeenBy.remove(widget.user['uid']);
+
+                    Map<String, dynamic> info = {
+                      'seenBy': seenBy,
+                      'notSeenBy': notSeenBy
+                    };
+
+                    DatabaseMethods().updateGroupSeenInfo(
+                        widget.groupInfo['id'], ds['id'], info);
                   }
                   return Wrap(
                     crossAxisAlignment: WrapCrossAlignment.end,
@@ -193,28 +189,46 @@ class _ChatRoomState extends State<ChatRoom> {
                                 ? backgroundColor1
                                 : backgroundColor1.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(15)),
-                        child: SelectableText(
-                          ds['message'],
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: sendbyMe
-                                  ? backgroundColor2
-                                  : backgroundColor1),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ds['senderName'],
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 12,
+                                  color: sendbyMe
+                                      ? backgroundColor2.withOpacity(0.7)
+                                      : backgroundColor1.withOpacity(0.7)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: SelectableText(
+                                ds['message'],
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: sendbyMe
+                                        ? backgroundColor2
+                                        : backgroundColor1),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8, right: 8),
-                        child: Visibility(
-                          visible: sendbyMe,
-                          child: Icon(
-                            ds['seen']
-                                ? Icons.check_circle
-                                : Icons.check_circle_outline,
-                            color: ds['seen'] ? backgroundColor1 : Colors.grey,
-                            size: 15,
-                          ),
-                        ),
-                      )
+                      // Padding(
+                      //   padding: const EdgeInsets.only(bottom: 8, right: 8),
+                      //   child: Visibility(
+                      //     visible: sendbyMe,
+                      //     child: Icon(
+                      //       ds['seen']
+                      //           ? Icons.check_circle
+                      //           : Icons.check_circle_outline,
+                      //       color: ds['seen'] ? backgroundColor1 : Colors.grey,
+                      //       size: 15,
+                      //     ),
+                      //   ),
+                      // )
                     ],
                   );
                 },
@@ -231,7 +245,6 @@ class _ChatRoomState extends State<ChatRoom> {
     return isLoading
         ? Loading()
         : Scaffold(
-            
             body: Stack(
               children: [
                 Align(

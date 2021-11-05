@@ -59,6 +59,8 @@ class _ChatsState extends State<Chats> {
     var month = '${timestamp.month}'.length > 1
         ? '${timestamp.month}'
         : '0${timestamp.month}';
+    
+    var year = '${timestamp.year}'.substring(2);
 
     if (yearDiff < 1 &&
         monthDiff < 1 &&
@@ -76,10 +78,10 @@ class _ChatsState extends State<Chats> {
       } else {
         return '$hour:$min AM';
       }
-    } else if (yearDiff < 1 && monthDiff < 1 && dayDiff < 2) {
+    } else if ((yearDiff < 1 && monthDiff < 1 && dayDiff < 2) || (yearDiff < 1 && monthDiff <= 1 && dayDiff < 0) || (yearDiff == 1 && currentTime.day == 1 && currentTime.month == 1)) {
       return 'Yesterday';
     } else {
-      return '$day/$month/${timestamp.year}';
+      return '$day/$month/$year';
     }
   }
 
@@ -119,7 +121,7 @@ class _ChatsState extends State<Chats> {
                 child: Text(
                   '${snapshot.data.docs.length}',
                   style: TextStyle(
-                      color: backgroundColor2, fontWeight: FontWeight.bold),
+                      color: backgroundColor2, fontWeight: FontWeight.bold, fontSize: 10),
                 ),
               )
             : Container(
@@ -162,13 +164,17 @@ class _ChatsState extends State<Chats> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ChatRoom(
+                                        builder: (context) => ChatRoomBar(
                                             user: widget.user,
                                             friendUser: friendUser)));
                               },
                               title: Text(
                                 friendUser['name'],
                                 style: TextStyle(fontWeight: FontWeight.bold),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                
                               ),
                               subtitle: Text(
                                 ds['lastMessage'],
